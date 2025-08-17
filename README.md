@@ -30,7 +30,7 @@ AI-powered meeting transcript summarizer that leverages Groq's LLM API to genera
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Manvendra27saini/NoteSwift.git
+   git clone https://github.com/Manvendra27saini/psychic-invention.git
    cd NoteSwift
    ```
 
@@ -135,7 +135,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 1. Check the [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md)
-  2. Open an [Issue](https://github.com/Manvendra27saini/NoteSwift/issues)
+  2. Open an [Issue](https://github.com/Manvendra27saini/psychic-invention/issues)
 3. Review the troubleshooting guide in the documentation
 
 ---
