@@ -88,10 +88,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate summary endpoint
   app.post("/api/summaries", async (req, res) => {
     try {
-      const summaryData = insertSummarySchema.parse(req.body);
+      const requestSchema = z.object({
+        transcriptId: z.string(),
+        customPrompt: z.string().min(1),
+      });
+      
+      const { transcriptId, customPrompt } = requestSchema.parse(req.body);
       
       // Get the transcript
-      const transcript = await storage.getTranscript(summaryData.transcriptId);
+      const transcript = await storage.getTranscript(transcriptId);
       if (!transcript) {
         return res.status(404).json({ message: "Transcript not found" });
       }
@@ -99,11 +104,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate summary using Groq
       const generatedSummary = await generateSummary(
         transcript.content,
-        summaryData.customPrompt
+        customPrompt
       );
 
       const summary = await storage.createSummary({
-        ...summaryData,
+        transcriptId,
+        customPrompt,
         generatedSummary,
       });
 

@@ -99,7 +99,10 @@ export class DatabaseStorage implements IStorage {
   async createEmailLog(insertEmailLog: InsertEmailLog): Promise<EmailLog> {
     const [emailLog] = await db
       .insert(emailLogs)
-      .values(insertEmailLog)
+      .values({
+        ...insertEmailLog,
+        recipients: insertEmailLog.recipients as any
+      })
       .returning();
     return emailLog;
   }
