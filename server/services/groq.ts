@@ -59,48 +59,109 @@ Please provide a well-structured summary following the given instructions.`;
 
 // Mock summary generator for demonstration when API key is invalid
 function generateMockSummary(transcript: string, customPrompt: string): string {
-  const isActionItems = customPrompt.toLowerCase().includes("action");
-  const isBulletPoints = customPrompt.toLowerCase().includes("bullet");
-  const isExecutive = customPrompt.toLowerCase().includes("executive");
-
-  if (isActionItems) {
+  const lowerPrompt = customPrompt.toLowerCase();
+  const lowerTranscript = transcript.toLowerCase();
+  
+  // Extract key information from transcript
+  const hasNumbers = /\d+%|\$\d+|\d+ million|\d+ thousand/g.test(transcript);
+  const mentionsAction = /action|task|todo|deadline|due|complete|finish/i.test(transcript);
+  const mentionsTime = /\d+:\d+|am|pm|morning|afternoon|evening|today|tomorrow|monday|tuesday|wednesday|thursday|friday/i.test(transcript);
+  const mentionsMoney = /\$|budget|cost|revenue|profit|sales|financial/i.test(transcript);
+  
+  // Extract names (basic pattern matching)
+  const names = transcript.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b/g) || [];
+  const uniqueNames = [...new Set(names)].slice(0, 3);
+  
+  // Extract numbers/percentages
+  const numbers = transcript.match(/\d+%|\d+/g) || [];
+  const percentages = transcript.match(/\d+%/g) || [];
+  
+  // Different summary formats based on prompt
+  if (lowerPrompt.includes("action")) {
+    const actionItems = [];
+    
+    if (mentionsAction || uniqueNames.length > 0) {
+      uniqueNames.forEach(name => {
+        if (mentionsMoney) actionItems.push(`${name} to review budget and financial projections`);
+        if (mentionsTime) actionItems.push(`${name} to provide updates by end of week`);
+      });
+    }
+    
+    if (actionItems.length === 0) {
+      actionItems.push("Follow up on discussed topics", "Schedule next meeting", "Review meeting notes");
+    }
+    
     return `**Action Items Summary:**
 
-• John to prepare detailed financial report by Friday
-• Sarah to finalize campaign budget by Wednesday
-• Review quarterly results presentation materials
-• Schedule follow-up meeting for campaign launch planning
+${actionItems.map(item => `• ${item}`).join('\n')}
 
-**Key Decisions:**
-• Quarterly growth of 15% was presented and approved
-• New marketing campaign launch approved for next month`;
+**Key Discussion Points:**
+${percentages.length > 0 ? `• Performance metrics mentioned: ${percentages.join(', ')}` : '• Various performance topics discussed'}
+${mentionsMoney ? '• Financial aspects reviewed' : '• Strategic planning topics covered'}`;
   }
 
-  if (isBulletPoints || isExecutive) {
+  if (lowerPrompt.includes("bullet") || lowerPrompt.includes("executive")) {
+    const keyPoints = [];
+    
+    if (uniqueNames.length > 0) {
+      keyPoints.push(`**Participants:** ${uniqueNames.join(', ')}`);
+    }
+    
+    if (percentages.length > 0) {
+      keyPoints.push(`**Key Metrics:** ${percentages.join(', ')} performance indicators discussed`);
+    }
+    
+    if (mentionsMoney) {
+      keyPoints.push(`**Financial Focus:** Budget and revenue topics covered`);
+    }
+    
+    if (mentionsTime) {
+      keyPoints.push(`**Timeline:** Specific deadlines and schedules mentioned`);
+    }
+    
+    if (keyPoints.length === 0) {
+      keyPoints.push(`**Meeting Overview:** Strategic discussion with multiple stakeholders`);
+    }
+    
     return `**Executive Summary:**
 
-• **Meeting Duration:** 9:00 AM - 10:00 AM
-• **Key Performance:** 15% quarterly growth achieved
-• **Strategic Initiative:** New marketing campaign launching next month
-• **Action Items:** Financial report (Friday), Campaign budget (Wednesday)
-• **Participants:** John (Financial Results), Sarah (Marketing Campaign)
-
-**Key Outcomes:**
-• Strong quarterly performance demonstrated
-• Marketing expansion strategy approved
-• Clear deliverables assigned with deadlines`;
-  }
-
-  return `**Meeting Summary:**
-
-This one-hour meeting covered two main topics: quarterly financial performance and upcoming marketing initiatives.
-
-**Financial Performance:**
-John presented the quarterly results, highlighting a strong 15% growth rate that exceeded expectations.
-
-**Marketing Campaign:**
-Sarah outlined plans for a new marketing campaign scheduled to launch next month, demonstrating the company's commitment to continued growth.
+${keyPoints.map(point => `• ${point}`).join('\n')}
 
 **Next Steps:**
-The team established clear action items with specific deadlines to maintain momentum on both financial reporting and marketing execution.`;
+• Implementation of discussed strategies
+• Follow-up on assigned responsibilities
+• Progress review in upcoming meetings`;
+  }
+
+  if (lowerPrompt.includes("detailed") || lowerPrompt.includes("comprehensive")) {
+    return `**Comprehensive Meeting Summary:**
+
+**Overview:**
+The meeting covered several important topics with ${uniqueNames.length > 0 ? uniqueNames.join(' and ') : 'the team'}.
+
+**Key Discussion Areas:**
+${hasNumbers ? '• Quantitative analysis and performance metrics were reviewed' : '• Strategic planning and operational topics discussed'}
+${mentionsMoney ? '• Financial planning and budget considerations' : '• Resource allocation and planning matters'}
+${mentionsAction ? '• Specific action items and deliverables identified' : '• Strategic initiatives and future planning'}
+
+**Outcomes:**
+The meeting successfully addressed the primary objectives and established clear direction for moving forward.
+
+**Follow-up Required:**
+Regular check-ins and progress updates will ensure successful implementation of discussed initiatives.`;
+  }
+
+  // Default summary format
+  return `**Meeting Summary:**
+
+**Participants & Discussion:**
+This meeting included ${uniqueNames.length > 0 ? uniqueNames.join(', ') : 'multiple stakeholders'} discussing key business topics.
+
+**Key Highlights:**
+${percentages.length > 0 ? `• Performance metrics: ${percentages.join(', ')}` : '• Strategic performance topics covered'}
+${mentionsMoney ? '• Financial planning and budget review' : '• Operational planning discussions'}
+${mentionsAction ? '• Action items and responsibilities assigned' : '• Strategic initiatives outlined'}
+
+**Conclusion:**
+The meeting achieved its objectives and set clear expectations for next steps and follow-up activities.`;
 }
