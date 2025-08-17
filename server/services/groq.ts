@@ -1,13 +1,17 @@
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || process.env.GROQ_KEY || "",
-});
-
 export async function generateSummary(
   transcript: string,
   customPrompt: string
 ): Promise<string> {
+  // Initialize Groq client inside the function to ensure environment variables are loaded
+  const apiKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY || "";
+  console.log('Groq API Key check:', apiKey ? 'Present' : 'Missing');
+  
+  const groq = new Groq({
+    apiKey: apiKey,
+  });
+
   if (!groq.apiKey) {
     throw new Error("Groq API key is not configured");
   }
